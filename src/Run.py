@@ -60,7 +60,7 @@ def main():
     myLRClassifier = LogisticRegression(data.training_set,
                                         data.validation_set,
                                         data.test_set,
-                                        learning_rate=0.005,
+                                        learning_rate=0.20,
                                         epochs=30)
 
     print("\nLogistic Regression has been training..")
@@ -74,10 +74,10 @@ def main():
     myMLPClassifier = MultilayerPerceptron(data.training_set,
                                            data.validation_set,
                                            data.test_set,
-                                           learning_rate=0.005,
+                                           learning_rate=0.20,
                                            epochs=30)
 
-    print("\nLogistic Regression has been training..")
+    print("\nMultilayer Perceptron has been training..")
     myMLPClassifier.train()
     print("Done..")
     # Do the recognizer

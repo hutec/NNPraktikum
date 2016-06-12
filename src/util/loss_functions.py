@@ -86,7 +86,8 @@ class BinaryCrossEntropyError(Error):
 
     def calculate_error(self, target, output):
         # Here you have to implement the Binary Cross Entropy
-        pass
+        # TODO isn't this the same as the normal CrossEntropyError
+        return np.sum(target * np.log(output) + (1 - target) * np.log(1 - output))
 
 
 class CrossEntropyError(Error):
@@ -99,4 +100,4 @@ class CrossEntropyError(Error):
 
     def calculate_error(self, target, output):
         # Here you have to implement the Cross Entropy Error
-        pass
+        return np.sum(target * np.log(output) + (1 - target) * np.log(1 - output))

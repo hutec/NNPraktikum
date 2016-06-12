@@ -50,14 +50,22 @@ class Activation:
         pass
 
     @staticmethod
-    def softmax(outp):
+    def softmax(outp, outps):
+        """
+
+        :param outp: single output value to compute softmax
+        :param outps: all output values used for normalization
+        :return:
+        """
         # Here you have to code the softmax function
+        # TODO output depends on other nodes in output layer
+        return exp(1*outp) / output_sum
         pass
 
     @staticmethod
     def softmax_prime(outp):
         # Here you have to code the the derivative of softmax function
-        pass
+        return outp * (1 - outp)
 
     @staticmethod
     def get_activation(function_name):

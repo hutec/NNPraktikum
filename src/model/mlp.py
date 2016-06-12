@@ -1,9 +1,13 @@
 
-import numpy as np
-
-# from util.activation_functions import Activation
+from util.activation_functions import Activation
 from model.logistic_layer import LogisticLayer
 from model.classifier import Classifier
+
+from sklearn.metrics import accuracy_score
+
+import numpy as np
+
+import copy
 
 
 class MultilayerPerceptron(Classifier):
@@ -14,7 +18,6 @@ class MultilayerPerceptron(Classifier):
     def __init__(self, train, valid, test, layers=None, input_weights=None,
                  output_task='classification', output_activation='softmax',
                  cost='crossentropy', learning_rate=0.01, epochs=50):
-
         """
         A digit-7 recognizer based on logistic regression algorithm
 
@@ -23,6 +26,10 @@ class MultilayerPerceptron(Classifier):
         train : list
         valid : list
         test : list
+        layers: list
+            List of layers
+        input_weights: list
+            weight layer
         learning_rate : float
         epochs : positive int
 
@@ -38,6 +45,7 @@ class MultilayerPerceptron(Classifier):
 
         self.learning_rate = learning_rate
         self.epochs = epochs
+        # TODO this should determine which error function to use
         self.output_task = output_task  # Either classification or regression
         self.output_activation = output_activation
         self.cost = cost
@@ -53,6 +61,18 @@ class MultilayerPerceptron(Classifier):
         self.layers = layers
         self.input_weights = input_weights
 
+        # Build up the network from specific layers
+        # Here is an example of a MLP acting like the Logistic Regression
+        if layers is None:
+            self.layers = []
+            output_activation = "sigmoid"
+            self.layers.append(LogisticLayer(train.input.shape[1], 10,
+                                             is_classifier_layer=False))
+            self.layers.append(LogisticLayer(10, 1,
+                                             is_classifier_layer=True))
+        else:
+            self.layers = layers
+
         # add bias values ("1"s) at the beginning of all data sets
         self.training_set.input = np.insert(self.training_set.input, 0, 1,
                                             axis=1)
@@ -60,11 +80,6 @@ class MultilayerPerceptron(Classifier):
                                               axis=1)
         self.test_set.input = np.insert(self.test_set.input, 0, 1, axis=1)
 
-        # Build up the network from specific layers
-        # Here is an example of a MLP acting like the Logistic Regression
-        self.layers = []
-        output_activation = "sigmoid"
-        self.layers.append(LogisticLayer(10, 1, None, output_activation, True))
 
     def _get_layer(self, layer_index):
         return self.layers[layer_index]
@@ -87,8 +102,13 @@ class MultilayerPerceptron(Classifier):
         # Here you have to propagate forward through the layers
         # And remember the activation values of each layer
         """
+        for i, layer in enumerate(self.layers):
+            if i > 0:
+                # Input with value 1 for bias weight
+                inp = np.insert(inp, 0, 1, axis=0)
+            inp = layer.forward(inp)
 
-        pass
+        return inp
 
     def _compute_error(self, target):
         """
@@ -99,13 +119,24 @@ class MultilayerPerceptron(Classifier):
         ndarray :
             a numpy array (1,nOut) containing the output of the layer
         """
-        pass
+
+        for i, layer in enumerate(reversed(self.layers)):
+            if i == 0:
+                next_derivatives = np.array(target - layer.outp)
+                next_weights = np.ones(layer.shape[1])
+
+            layer.computeDerivative(next_derivatives, next_weights)
+            next_derivatives = layer.deltas
+            next_weights = layer.weights[1:]
+
 
     def _update_weights(self):
         """
         Update the weights of the layers by propagating back the error
         """
-        pass
+        for layer in self.layers:
+            layer.updateWeights(self.learning_rate)
+
 
     def train(self, verbose=True):
         """Train the Multi-layer Perceptrons
@@ -116,19 +147,43 @@ class MultilayerPerceptron(Classifier):
             Print logging messages with validation accuracy if verbose is True.
         """
 
-        pass
+        for epoch in range(self.epochs):
+            if verbose:
+                print("Training epoch {0}/{1}.."
+                      .format(epoch + 1, self.epochs))
+
+            self._train_one_epoch()
+
+            if verbose:
+                accuracy = accuracy_score(self.validation_set.label,
+                                          self.evaluate(self.validation_set))
+                # Record the performance of each epoch for later usages
+                # e.g. plotting, reporting..
+                self.performances.append(accuracy)
+                print("Accuracy on validation: {0:.2f}%"
+                      .format(accuracy * 100))
+                print("-----------------------------")
 
     def _train_one_epoch(self):
         """
         Train one epoch, seeing all input instances
         """
 
-        pass
+        old_weights = copy.deepcopy(self.layers[0].weights)
+
+        for img, label in zip(self.training_set.input,
+                              self.training_set.label):
+            self._feed_forward(img)
+            self._compute_error(label)
+            self._update_weights()
+
+
 
     def classify(self, test_instance):
         # Classify an instance given the model of the classifier
         # You need to implement something here
-        return True
+        outp = self._feed_forward(test_instance)
+        return outp > 0.5
 
     def evaluate(self, test=None):
         """Evaluate a whole dataset.
