@@ -25,6 +25,10 @@ class Error:
         # calculate the error between target and output
         pass
 
+    def derivative_error(self, target, output):
+        # derivative of loss function
+        pass
+
 
 class AbsoluteError(Error):
     """
@@ -62,6 +66,9 @@ class MeanSquaredError(Error):
         # MSE = 1/n*sum (i=1 to n) of (target_i - output_i)^2)
         return (1/len(target))*np.sum((target-output)**2)
 
+    def derivative_error(self, target, output):
+        return -(target - output)
+
 
 class SumSquaredError(Error):
     """
@@ -86,7 +93,6 @@ class BinaryCrossEntropyError(Error):
 
     def calculate_error(self, target, output):
         # Here you have to implement the Binary Cross Entropy
-        # TODO isn't this the same as the normal CrossEntropyError
         return np.sum(target * np.log(output) + (1 - target) * np.log(1 - output))
 
 
@@ -101,3 +107,20 @@ class CrossEntropyError(Error):
     def calculate_error(self, target, output):
         # Here you have to implement the Cross Entropy Error
         return np.sum(target * np.log(output) + (1 - target) * np.log(1 - output))
+
+    def derivative_error(self, target, output):
+        return  -(target / output) + (1 - target) / (1 - output)
+
+
+def get_loss(function_name):
+    """
+    Returns the loss function corresponding to the given string
+    """
+
+    if function_name == 'mse':
+        return MeanSquaredError()
+    elif function_name == 'crossentropy':
+        return CrossEntropyError()
+    else:
+        raise ValueError('Unknown loss function: ' + function_name)
+

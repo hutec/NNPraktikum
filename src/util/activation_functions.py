@@ -4,8 +4,10 @@
 Activation functions which can be used within neurons.
 """
 
+import numpy as np
 from numpy import exp
 from numpy import divide
+
 
 
 class Activation:
@@ -50,17 +52,9 @@ class Activation:
         pass
 
     @staticmethod
-    def softmax(outp, outps):
-        """
-
-        :param outp: single output value to compute softmax
-        :param outps: all output values used for normalization
-        :return:
-        """
+    def softmax(outp):
         # Here you have to code the softmax function
-        # TODO output depends on other nodes in output layer
-        return exp(1*outp) / output_sum
-        pass
+        return np.divide(np.exp(outp), np.sum(np.exp(outp)))
 
     @staticmethod
     def softmax_prime(outp):

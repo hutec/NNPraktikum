@@ -1,9 +1,10 @@
 import numpy as np
 
 from util.activation_functions import Activation
+import util.loss_functions as loss_functions
 
 
-class LogisticLayer():
+class Layer():
     """
     A layer of neural
 
@@ -43,7 +44,7 @@ class LogisticLayer():
         self.activation_string = activation
         self.activation = Activation.get_activation(self.activation_string)
         self.activation_derivative = Activation.get_derivative(
-                                    self.activation_string)
+            self.activation_string)
 
         self.n_in = n_in
         self.n_out = n_out
@@ -80,8 +81,6 @@ class LogisticLayer():
         outp: ndarray
             a numpy array (n_out,1) containing the output of the layer
         """
-
-        # Here you have to implement the forward pass
         self.inp = inp
         outp = self._fire(inp)
         self.outp = outp
@@ -105,53 +104,21 @@ class LogisticLayer():
             a numpy array containing the partial derivatives on this layer
         """
 
-        # Here the implementation of partial derivative calculation
-
-        # In case of the output layer, next_weights is array of 1
-        # and next_derivatives - the derivative of the error will be the errors
-        # Please see the call of this method in LogisticRegression.
-        # self.deltas = (self.outp *
-        #                (1 - self.outp) *
-        #                np.dot(next_derivatives, next_weights))
-
-        # Or more general: output*(1-output) is the derivatives of sigmoid
-        # (sigmoid_prime)
-        # self.deltas = (Activation.sigmoid_prime(self.outp) *
-        #                np.dot(next_derivatives, next_weights))
-
-        # Or even more general: doesn't care which activation function is used
-        # self.deltas = (self.activation_derivative(self.outp) *
-        #                np.dot(next_derivatives, next_weights))
-
-        self.deltas = (self.activation_derivative(self.outp) *
-                       np.tensordot(next_derivatives, next_weights, axes=([0], [-1])))
-
-
-        # Or you can explicitly calculate the derivatives for two cases
-        # Page 40 Back-propagation slides
-
-        # if self.is_classifier_layer:
-        #     self.deltas = (next_derivatives - self.outp) * self.outp * \
-        #                   (1 - self.outp)
-        # else:
-        #     self.deltas = self.outp * (1 - self.outp) * \
-        #                     np.sum(np.tensordot(next_derivatives, next_weights, axes=([0], [-1])))
-                          #np.dot(next_derivatives, next_weights)
-
-        # Or you can have two computeDerivative methods, feel free to call
-        # the other is computeOutputLayerDerivative or such.
+        if self.is_classifier_layer:
+            self.deltas = self.activation_derivative(self.outp) * next_derivatives
+        else:
+            self.deltas = (self.activation_derivative(self.outp) *
+                           np.tensordot(next_derivatives, next_weights, axes=([0], [-1])))
 
     def updateWeights(self, learning_rate):
         """
         Update the weights of the layer
         """
 
-        # Here the implementation of weight updating mechanism
-        # Page 40 Back-propagation slides
         for neuron in range(0, self.n_out):
             self.weights[:, neuron] += (learning_rate *
                                         self.deltas[neuron] *
                                         self.inp)
 
     def _fire(self, inp):
-        return Activation.sigmoid(np.dot(np.array(inp), self.weights))
+        return self.activation(np.dot(np.array(inp), self.weights))

@@ -13,6 +13,31 @@ from report.performance_plot import PerformancePlot
 
 
 def main():
+    classify_all()
+    # classify_one()
+
+
+def classify_all():
+    data = MNISTSeven("../data/mnist_seven.csv", 4000, 500, 500,
+                      one_hot=False)
+
+    mlp = MultilayerPerceptron(data.training_set,
+                               data.validation_set,
+                               data.test_set,
+                               output_task="classify_all",
+                               cost='crossentropy',
+                               output_activation='softmax',
+                               learning_rate=0.30,
+                               epochs=50)
+
+    mlp.train()
+    pred = mlp.evaluate()
+
+    evaluator = Evaluator()
+    evaluator.printAccuracy(data.test_set, pred)
+
+
+def classify_one():
     data = MNISTSeven("../data/mnist_seven.csv", 3000, 1000, 1000,
                       one_hot=True, target_digit='7')
 
@@ -74,8 +99,8 @@ def main():
     myMLPClassifier = MultilayerPerceptron(data.training_set,
                                            data.validation_set,
                                            data.test_set,
-                                           learning_rate=0.20,
-                                           epochs=30)
+                                           learning_rate=0.30,
+                                           epochs=50)
 
     print("\nMultilayer Perceptron has been training..")
     myMLPClassifier.train()
@@ -103,6 +128,7 @@ def main():
     print("\nResult of the Multi-layer Perceptron recognizer (on test set):")
     # evaluator.printComparison(data.testSet, perceptronPred)
     evaluator.printAccuracy(data.test_set, mlpPred)
+
 
     # Draw
     plot = PerformancePlot("Logistic Regression")
