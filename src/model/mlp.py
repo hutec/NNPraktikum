@@ -84,10 +84,10 @@ class MultilayerPerceptron(Classifier):
                                                  is_classifier_layer=True))
             elif output_task == 'classify_all':
                 self.layers = []
-                self.layers.append(Layer(train.input.shape[1], 10,
-                                         activation='softmax',
+                self.layers.append(Layer(train.input.shape[1], 100,
+                                         activation='sigmoid',
                                          is_classifier_layer=False))
-                self.layers.append(Layer(10, 10,
+                self.layers.append(Layer(100, 10,
                                          activation='softmax',
                                          is_classifier_layer=True))
 
