@@ -13,6 +13,7 @@ class LogisticLayer():
     n_out: int: number of units of the current layer (or output)
     activation: string: activation function of every units in the layer
     is_classifier_layer: bool:  to do classification or regression
+    fixed_weights: bool: do not change weights in update steps (should be used as first layer)
 
     Attributes
     ----------
@@ -37,7 +38,7 @@ class LogisticLayer():
     """
 
     def __init__(self, n_in, n_out, weights=None,
-                 activation='sigmoid', is_classifier_layer=False):
+                 activation='sigmoid', is_classifier_layer=False, fixed_weights=False):
 
         # Get activation function from string
         self.activation_string = activation
@@ -52,6 +53,8 @@ class LogisticLayer():
         self.inp[0] = 1
         self.outp = np.ndarray((n_out, 1))
         self.deltas = np.zeros((n_out, 1))
+
+        self.fixed_weights = fixed_weights
 
         # You can have better initialization here
         if weights is None:
@@ -120,6 +123,9 @@ class LogisticLayer():
         #                np.dot(next_derivatives, next_weights))
 
         # Or even more general: doesn't care which activation function is used
+        if self.fixed_weights:
+            return
+
         self.deltas = (self.activation_derivative(self.outp) *
                        np.dot(next_derivatives, next_weights))
 
@@ -141,10 +147,11 @@ class LogisticLayer():
 
         # Here the implementation of weight updating mechanism
         # Page 40 Back-propagation slides
-        for neuron in range(0, self.n_out):
-            self.weights[:, neuron] += (learning_rate *
-                                        self.deltas[neuron] *
-                                        self.inp)
+        if not self.fixed_weights:
+            for neuron in range(0, self.n_out):
+                self.weights[:, neuron] += (learning_rate *
+                                            self.deltas[neuron] *
+                                            self.inp)
 
     def _fire(self, inp):
         net_output = np.dot(np.array(inp), self.weights)

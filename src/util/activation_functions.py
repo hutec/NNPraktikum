@@ -38,7 +38,7 @@ class Activation:
     @staticmethod
     def tanh_prime(outp):
         # Here you have to code the derivative of tanh function
-        pass
+        return 1 - divide((exp(outp) - exp(-outp)) ** 2, (exp(outp) + exp(-outp)) ** 2)
 
     @staticmethod
     def identity(outp):

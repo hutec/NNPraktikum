@@ -14,7 +14,7 @@ class MultilayerPerceptron(Classifier):
     A multilayer perceptron used for classification
     """
 
-    def __init__(self, train, valid, test, layers=None, input_weights=None,
+    def __init__(self, train, valid, test, layers=None, encoding_layer=None, input_weights=None,
                  output_task='classification', output_activation='softmax',
                  cost='crossentropy', learning_rate=0.01, epochs=50):
 
@@ -37,6 +37,7 @@ class MultilayerPerceptron(Classifier):
         learning_rate : float
         epochs : positive int
         performances: array of floats
+        encoding_layer: hidden layer learned from autoencoder
         """
 
         self.learning_rate = learning_rate
@@ -65,10 +66,23 @@ class MultilayerPerceptron(Classifier):
             # First hidden layer
             number_of_1st_hidden_layer = 100
 
-            self.layers.append(LogisticLayer(train.input.shape[1],
-                                             number_of_1st_hidden_layer, None,
-                                             activation="sigmoid",
-                                             is_classifier_layer=False))
+            if encoding_layer is not None:
+                self.layers.append(LogisticLayer(train.input.shape[1],
+                                                 encoding_layer.shape[1],
+                                                 activation="sigmoid",
+                                                 is_classifier_layer=False,
+                                                 weights=encoding_layer,
+                                                 fixed_weights=True))
+
+                self.layers.append(LogisticLayer(encoding_layer.shape[1],
+                                                 number_of_1st_hidden_layer, None,
+                                                 activation="sigmoid",
+                                                 is_classifier_layer=False))
+            else:
+                self.layers.append(LogisticLayer(train.input.shape[1],
+                                                 number_of_1st_hidden_layer, None,
+                                                 activation="sigmoid",
+                                                 is_classifier_layer=False))
 
             # Output layer
             self.layers.append(LogisticLayer(number_of_1st_hidden_layer,

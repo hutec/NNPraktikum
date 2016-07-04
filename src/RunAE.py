@@ -31,12 +31,16 @@ def main():
     myDAE = DenoisingAutoEncoder(data.training_set,
                                  data.validation_set,
                                  data.test_set,
-                                 learning_rate=0.05,
+                                 learning_rate=0.05, # prev: 0.05
                                  epochs=30)
 
     print("\nAutoencoder  has been training..")
     myDAE.train()
     print("Done..")
+    print("Saving weights")
+    myDAE.save_weights()
+    myDAE.save_features()
+    myDAE.__del__()
 
     # Multi-layer Perceptron
     # NOTES:
@@ -45,10 +49,13 @@ def main():
     # And do the classification
 
     # Correct the code here
+
+    # TOOD take random weights for all layers other than the hidden AE layer
     myMLPClassifier = MultilayerPerceptron(data.training_set,
                                            data.validation_set,
-                                            data.test_set,
-                                            learning_rate=0.05,
+                                           data.test_set,
+                                           encoding_layer=myDAE._get_weights(),
+                                           learning_rate=0.05,
                                            epochs=30)
 
     print("\nMulti-layer Perceptron has been training..")
