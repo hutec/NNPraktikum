@@ -64,7 +64,7 @@ class MultilayerPerceptron(Classifier):
             self.layers = []
 
             # First hidden layer
-            number_of_1st_hidden_layer = 100
+            number_of_1st_hidden_layer = 50
 
             if encoding_layer is not None:
                 self.layers.append(LogisticLayer(train.input.shape[1],
@@ -85,7 +85,7 @@ class MultilayerPerceptron(Classifier):
                                                  is_classifier_layer=False))
 
             # Output layer
-            self.layers.append(LogisticLayer(number_of_1st_hidden_layer,
+            self.layers.append(LogisticLayer(self.layers[-1].shape[1],
                                              10, None,
                                              activation="softmax",
                                              is_classifier_layer=True))

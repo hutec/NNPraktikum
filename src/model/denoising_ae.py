@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.metrics import accuracy_score
 
-from util.loss_functions import MeanSquaredError
+from util.loss_functions import MeanSquaredError, AbsoluteError
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
                     level=logging.DEBUG,
@@ -24,7 +24,7 @@ class DenoisingAutoEncoder(AutoEncoder):
     cross entropy error ist used.
     """
 
-    def __init__(self, train, valid, test, learning_rate=0.1, epochs=30, hidden_layers=196, corruption=0.3):
+    def __init__(self, train, valid, test, learning_rate=0.1, epochs=30, hidden_units=100, corruption=0.2):
         """
          Parameters
         ----------
@@ -52,7 +52,7 @@ class DenoisingAutoEncoder(AutoEncoder):
         self.validation_set = valid
         self.test_set = test
 
-        self.number_of_hidden_layers = hidden_layers
+        self.number_of_hidden_units = hidden_units
         self.corruption = corruption
 
         self.error = MeanSquaredError()
@@ -68,12 +68,12 @@ class DenoisingAutoEncoder(AutoEncoder):
 
             # Hidden Layer
             self.layers.append(LogisticLayer(train.input.shape[1],
-                                             self.number_of_hidden_layers, None,
+                                             self.number_of_hidden_units, None,
                                              activation="sigmoid",
                                              is_classifier_layer=False))
 
             # Output layer
-            self.layers.append(LogisticLayer(self.number_of_hidden_layers,
+            self.layers.append(LogisticLayer(self.number_of_hidden_units,
                                              train.input.shape[1], None,
                                              activation="sigmoid",
                                              is_classifier_layer=True))
@@ -101,10 +101,7 @@ class DenoisingAutoEncoder(AutoEncoder):
                 accuracy = self.evaluate(self.validation_set)
                 accuracy = np.max(accuracy)
 
-                # accuracy = accuracy_score(self.validation_set.label,
-                #                           self.evaluate(self.validation_set))
-                # Record the performance of each epoch for later usages
-                # e.g. plotting, reporting..
+
                 self.performances.append(accuracy)
                 print("Accuracy on validation: {0:.3f}%"
                       .format(accuracy * 100))
